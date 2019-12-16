@@ -24,6 +24,25 @@ Copyright (c) 2013-2018 brinkqiang (brink.qiang@gmail.com)
 ## Intro
 dmlockfree mod by SPSCQueue
 ```cpp
+#include <iostream>
+#include <dmlockfree_spscqueue.h>
+#include <thread>
+
+int main(int argc, char *argv[]) {
+  (void)argc, (void)argv;
+  SPSCQueue<int> q(2);
+  auto t = std::thread([&] {
+    while (!q.front())
+      ;
+    std::cout << *q.front() << std::endl;
+    q.pop();
+  });
+  q.push(1);
+  t.join();
+
+  return 0;
+}
+
 ```
 ## Contacts
 [![Join the chat](https://badges.gitter.im/brinkqiang/dmlockfree/Lobby.svg)](https://gitter.im/brinkqiang/dmlockfree)
