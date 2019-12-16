@@ -1,6 +1,6 @@
 
-#ifndef __DMLOCKFREE_SPSCQUEUE_H_INCLUDE__
-#define __DMLOCKFREE_SPSCQUEUE_H_INCLUDE__
+#ifndef __DMQUEUE_H_INCLUDE__
+#define __DMQUEUE_H_INCLUDE__
 
 #include <atomic>
 #include <cassert>
@@ -8,9 +8,9 @@
 #include <stdexcept>
 #include <type_traits>
 
-template <typename T> class SPSCQueue {
+template <typename T> class CDMQueue {
 public:
-  explicit SPSCQueue(const size_t capacity)
+  explicit CDMQueue(const size_t capacity)
       : capacity_(capacity),
         slots_(capacity_ < 2 ? nullptr
                              : static_cast<T *>(operator new[](
@@ -19,13 +19,13 @@ public:
     if (capacity_ < 2) {
       throw std::invalid_argument("size < 2");
     }
-    assert(alignof(SPSCQueue<T>) >= kCacheLineSize);
+    assert(alignof(CDMQueue<T>) >= kCacheLineSize);
     assert(reinterpret_cast<char *>(&tail_) -
                reinterpret_cast<char *>(&head_) >=
            static_cast<std::ptrdiff_t>(kCacheLineSize));
   }
 
-  ~SPSCQueue() {
+  ~CDMQueue() {
     while (front()) {
       pop();
     }
@@ -33,8 +33,8 @@ public:
   }
 
   // non-copyable and non-movable
-  SPSCQueue(const SPSCQueue &) = delete;
-  SPSCQueue &operator=(const SPSCQueue &) = delete;
+  CDMQueue(const CDMQueue &) = delete;
+  CDMQueue &operator=(const CDMQueue &) = delete;
 
   template <typename... Args>
   void emplace(Args &&... args) noexcept(
@@ -147,4 +147,4 @@ private:
   char padding_[kCacheLineSize - sizeof(tail_)];
 };
 
-#endif // __DMLOCKFREE_SPSCQUEUE_H_INCLUDE__
+#endif // __DMQUEUE_H_INCLUDE__

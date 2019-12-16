@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
   (void)argc, (void)argv;
   // Functionality test
   {
-    SPSCQueue<TestType> q(11);
+    CDMQueue<TestType> q(11);
     assert(q.front() == nullptr);
     assert(q.size() == 0);
     assert(q.empty() == true);
@@ -74,7 +74,7 @@ int main(int argc, char *argv[]) {
       Test(const Test &) {}
       Test(Test &&) = delete;
     };
-    SPSCQueue<Test> q(16);
+    CDMQueue<Test> q(16);
     // lvalue
     Test v;
     q.emplace(v);
@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
       Test(const Test &) noexcept {}
       Test(Test &&) = delete;
     };
-    SPSCQueue<Test> q(16);
+    CDMQueue<Test> q(16);
     // lvalue
     Test v;
     q.emplace(v);
@@ -119,7 +119,7 @@ int main(int argc, char *argv[]) {
 
   // Movable only type
   {
-    SPSCQueue<std::unique_ptr<int>> q(16);
+    CDMQueue<std::unique_ptr<int>> q(16);
     // lvalue
     // auto v = std::unique_ptr<int>(new int(1));
     // q.emplace(v);
@@ -142,7 +142,7 @@ int main(int argc, char *argv[]) {
   {
     bool throws = false;
     try {
-      SPSCQueue<int> q(0);
+      CDMQueue<int> q(0);
     } catch (...) {
       throws = true;
     }
@@ -152,7 +152,7 @@ int main(int argc, char *argv[]) {
   // Fuzz and performance test
   {
     const size_t iter = 100000;
-    SPSCQueue<size_t> q(iter / 1000 + 1);
+    CDMQueue<size_t> q(iter / 1000 + 1);
     std::atomic<bool> flag(false);
     std::thread producer([&] {
       while (!flag)

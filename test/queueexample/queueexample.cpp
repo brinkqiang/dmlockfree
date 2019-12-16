@@ -1,10 +1,10 @@
 #include <iostream>
-#include <dmlockfree_spscqueue.h>
+#include <dmqueue.h>
 #include <thread>
 
 int main(int argc, char *argv[]) {
   (void)argc, (void)argv;
-  SPSCQueue<int> q(2);
+  CDMQueue<int> q(2);
   auto t = std::thread([&] {
     while (!q.front())
       ;
