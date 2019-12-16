@@ -2,7 +2,7 @@
 #include <cassert>
 #include <chrono>
 #include <iostream>
-#include <dmlockfree_spscqueue.h>
+#include <dmqueue.h>
 #include <set>
 #include <thread>
 
