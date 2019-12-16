@@ -15,11 +15,10 @@ SET(DMLOCKFREE_VERSION "${DMLOCKFREE_VERSION_MAJOR}.${DMLOCKFREE_VERSION_MINOR}.
 MESSAGE(STATUS "VERSION: ${DMLOCKFREE_VERSION}")
 
 OPTION(USE_DMLOCKFREE "use dmlockfree" OFF)
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/include/dmlockfree_config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/include/dmlockfree_config.h)
 
+ModuleInclude("" "")
 ModuleImport("dmlog" "thirdparty/dmlog")
-LibImport("dmlockfree" "src/dmlockfree_module")
-ExeImport("test" "dmlockfree;dmlog")
+ExeImport("test" "dmlog")
 
 #ADD_CUSTOM_COMMAND(
 #TARGET dmlockfreetest
