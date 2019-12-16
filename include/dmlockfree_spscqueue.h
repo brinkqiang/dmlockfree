@@ -28,8 +28,6 @@ SOFTWARE.
 #include <stdexcept>
 #include <type_traits>
 
-namespace rigtorp {
-
 template <typename T> class SPSCQueue {
 public:
   explicit SPSCQueue(const size_t capacity)
@@ -168,4 +166,3 @@ private:
   // Padding to avoid adjacent allocations to share cache line with tail_
   char padding_[kCacheLineSize - sizeof(tail_)];
 };
-} // namespace rigtorp
