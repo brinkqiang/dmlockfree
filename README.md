@@ -22,7 +22,7 @@ Copyright (c) 2013-2018 brinkqiang (brink.qiang@gmail.com)
 [win-link]:  https://ci.appveyor.com/project/brinkqiang/dmlockfree "AppVeyor build status"
 
 ## Intro
-dmlockfree
+dmlockfree mod by SPSCQueue
 ```cpp
 ```
 ## Contacts
