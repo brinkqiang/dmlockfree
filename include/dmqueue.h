@@ -147,9 +147,6 @@ private:
   char padding_[kCacheLineSize - sizeof(tail_)];
 };
 
-
-#include <stddef.h>
-
 class CDMVQueue {
 public:
     CDMVQueue(void)

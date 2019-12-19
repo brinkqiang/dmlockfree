@@ -6,7 +6,7 @@ const int gNum = 100000000;
 
 int main(int argc, char *argv[]) {
     (void)argc, (void)argv;
-    CDMQueue<int> q(100000);
+    CDMTQueue<int> q(100000);
     auto t = std::thread([&] {
         int i = 0;
         for (;i != gNum;)
