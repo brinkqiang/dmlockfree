@@ -146,19 +146,6 @@ private:
   // Padding to avoid adjacent allocations to share cache line with tail_
   char padding_[kCacheLineSize - sizeof(tail_)];
 };
-		m_nTail = (m_nTail + 1) % m_nSize;
-		return true;
-	}
-
-	void* CThrdQueue::PopFront() {
-		int nDist = m_nTail + m_nSize - m_nHead;
-		int nUsed = nDist >= m_nSize ? (nDist - m_nSize) : nDist;
-		if (0 == nUsed) {
-		   return nullptr;
-	    }
-
-		void* ptr = m_pArray[m_nHead];
-		m_nHead = (m_nHead + 1) % m_nSize;
 
 class CDMVQueue {
 public:
