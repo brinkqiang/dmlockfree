@@ -4,6 +4,8 @@
 #include "dmatomic_queue.h"
 #include "dmqueue.h"
 #include "concurrentqueue.h"
+#include "blockingconcurrentqueue.h"
+
 #include "dmformat.h"
 
 const int gNum = 100000000;
@@ -112,5 +114,39 @@ TEST(ConcurrentQueue, ConcurrentQueue)
 
 	t.join();
 	fmt::print("test ConcurrentQueue Done total = {}\n", total);
+
+}
+TEST(BlockingConcurrentQueue, BlockingConcurrentQueue)
+{
+	fmt::print("test BlockingConcurrentQueue {}\n", gNum);
+	moodycamel::BlockingConcurrentQueue<int> q(MaxPoolSize);
+
+	uint64_t total = 0;
+	auto t = std::thread([&] {
+		for (int i = 1; i < gNum;)
+		{
+			int a;
+			if (!q.try_dequeue(a))
+			{
+				//std::this_thread::sleep_for(std::chrono::milliseconds(1));;
+				continue;
+			}
+
+			total += a;
+			++i;
+		}
+		});
+
+	for (int i = 1; i < gNum; )
+	{
+		if (!q.try_enqueue(i))
+		{
+			continue;
+		}
+		i++;
+	}
+
+	t.join();
+	fmt::print("test BlockingConcurrentQueue Done total = {}\n", total);
 
 }
