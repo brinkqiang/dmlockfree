@@ -1,6 +1,6 @@
 
-#ifndef __DM_ATOMIC_QUEUE_H_INCLUDE__
-#define __DM_ATOMIC_QUEUE_H_INCLUDE__
+#ifndef __DMATOMIC_QUEUE_H_INCLUDE__
+#define __DMATOMIC_QUEUE_H_INCLUDE__
 
 #include <atomic>
 #include <cassert>
@@ -147,4 +147,4 @@ private:
   char padding_[kCacheLineSize - sizeof(tail_)];
 };
 
-#endif // __DM_ATOMIC_QUEUE_H_INCLUDE__
+#endif // __DMATOMIC_QUEUE_H_INCLUDE__
