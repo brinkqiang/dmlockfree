@@ -2,10 +2,11 @@
 #include <cassert>
 #include <chrono>
 #include <iostream>
-#include <dmqueue.h>
 #include <set>
 #include <thread>
 #include <gtest.h>
+#include "dmatomic_queue.h"
+
 // TestType tracks correct usage of constructors and destructors
 struct TestType {
   static std::set<const TestType *> constructed;
@@ -44,7 +45,7 @@ std::set<const TestType *> TestType::constructed;
 TEST(queuetest, queuetest) {
   // Functionality test
   {
-    CDMTQueue<TestType> q(11);
+    CDMAtomicQueue<TestType> q(11);
     assert(q.front() == nullptr);
     assert(q.size() == 0);
     assert(q.empty() == true);
@@ -73,7 +74,7 @@ TEST(queuetest, queuetest) {
       Test(const Test &) {}
       Test(Test &&) = delete;
     };
-    CDMTQueue<Test> q(16);
+    CDMAtomicQueue<Test> q(16);
     // lvalue
     Test v;
     q.emplace(v);
@@ -98,7 +99,7 @@ TEST(queuetest, queuetest) {
       Test(const Test &) noexcept {}
       Test(Test &&) = delete;
     };
-    CDMTQueue<Test> q(16);
+    CDMAtomicQueue<Test> q(16);
     // lvalue
     Test v;
     q.emplace(v);
@@ -118,7 +119,7 @@ TEST(queuetest, queuetest) {
 
   // Movable only type
   {
-    CDMTQueue<std::unique_ptr<int>> q(16);
+    CDMAtomicQueue<std::unique_ptr<int>> q(16);
     // lvalue
     // auto v = std::unique_ptr<int>(new int(1));
     // q.emplace(v);
@@ -141,7 +142,7 @@ TEST(queuetest, queuetest) {
   {
     bool throws = false;
     try {
-      CDMTQueue<int> q(0);
+      CDMAtomicQueue<int> q(0);
     } catch (...) {
       throws = true;
     }
@@ -151,7 +152,7 @@ TEST(queuetest, queuetest) {
   // Fuzz and performance test
   {
     const size_t iter = 100000;
-    CDMTQueue<size_t> q(iter / 1000 + 1);
+    CDMAtomicQueue<size_t> q(iter / 1000 + 1);
     std::atomic<bool> flag(false);
     std::thread producer([&] {
       while (!flag)
