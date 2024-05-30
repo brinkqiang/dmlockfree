@@ -15,24 +15,6 @@ SET(DMLOCKFREE_VERSION "${DMLOCKFREE_VERSION_MAJOR}.${DMLOCKFREE_VERSION_MINOR}.
 MESSAGE(STATUS "VERSION: ${DMLOCKFREE_VERSION}")
 
 OPTION(USE_DMLOCKFREE "use dmlockfree" OFF)
-
-ModuleInclude("" "")
+ModuleImport("dmtest" "thirdparty/dmtest")
 ModuleImport("dmlog" "thirdparty/dmlog")
-ExeImport("test" "dmlog")
-
-#ADD_CUSTOM_COMMAND(
-#TARGET dmlockfreetest
-#PRE_BUILD
-#COMMAND ${CMAKE_COMMAND} -E copy_if_different
-#${CMAKE_CURRENT_SOURCE_DIR}/config/test.csv
-#$<TARGET_FILE_DIR:dmlockfreetest>
-#)
-
-#INSTALL(DIRECTORY include/ DESTINATION include)
-#INSTALL(TARGETS dmlockfree
-#        RUNTIME DESTINATION bin
-#        LIBRARY DESTINATION lib
-#        ARCHIVE DESTINATION lib)
-
-#SET(DMLOCKFREE_LIBS "dmlockfree")
-#MARK_AS_ADVANCED(${DMLOCKFREE_LIBS})
+ExeImport("test" "dmtest")

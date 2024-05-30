@@ -5,7 +5,7 @@
 #include <dmqueue.h>
 #include <set>
 #include <thread>
-
+#include <gtest.h>
 // TestType tracks correct usage of constructors and destructors
 struct TestType {
   static std::set<const TestType *> constructed;
@@ -41,8 +41,7 @@ struct TestType {
 
 std::set<const TestType *> TestType::constructed;
 
-int main(int argc, char *argv[]) {
-  (void)argc, (void)argv;
+TEST(queuetest, queuetest) {
   // Functionality test
   {
     CDMTQueue<TestType> q(11);
@@ -182,6 +181,4 @@ int main(int argc, char *argv[]) {
 
     std::cout << duration.count() / iter << " ns/iter" << std::endl;
   }
-
-  return 0;
 }

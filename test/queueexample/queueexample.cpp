@@ -1,11 +1,12 @@
 #include <iostream>
 #include <dmqueue.h>
 #include <thread>
+#include <gtest.h>
 
 const int gNum = 100000000;
 
-int main(int argc, char *argv[]) {
-    (void)argc, (void)argv;
+TEST(queueexample, queueexample)
+{
     CDMTQueue<int> q(100000);
     auto t = std::thread([&] {
         int i = 0;
@@ -28,5 +29,4 @@ int main(int argc, char *argv[]) {
 
     t.join();
     std::cout << "pass" << std::endl;
-    return 0;
 }
