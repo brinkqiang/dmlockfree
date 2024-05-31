@@ -34,9 +34,13 @@ TEST(CDMAtomicQueue, CDMAtomicQueue)
         }
     });
 
-    for (int i = 1; i < gNum; i++)
+    for (int i = 1; i < gNum;)
     {
-        q.push(i);
+		if (!q.try_push(i))
+		{
+			continue;
+		}
+		i++;
     }
 
     t.join();
