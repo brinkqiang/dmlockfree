@@ -6,7 +6,7 @@
 #include "concurrentqueue.h"
 #include "blockingconcurrentqueue.h"
 #include "thread_safe_queue.h"
-
+#include "atomic_queue.h"
 
 #include "dmformat.h"
 
@@ -216,5 +216,41 @@ TEST(ThreadSafeQueue_condition, ThreadSafeQueue_condition)
 
 	t.join();
 	fmt::print("test ThreadSafeQueue Done total = {}\n", total);
+
+}
+
+TEST(CAtomicQueue, CAtomicQueue)
+{
+	fmt::print("test CAtomicQueue {}\n", gNum);
+	CAtomicQueue<int> q(MaxPoolSize);
+
+	uint64_t total = 0;
+	auto t = std::thread([&] {
+		for (int i = 1; i < gNum;)
+		{
+			if (q.empty())
+			{
+				std::this_thread::yield();
+				continue;
+			}
+			int a = *(q.front());
+			q.pop();
+			total += a;
+			++i;
+		}
+		});
+
+	for (int i = 1; i < gNum; )
+	{
+		if (!q.try_push(i))
+		{
+			std::this_thread::yield();
+			continue;
+		}
+		i++;
+	}
+
+	t.join();
+	fmt::print("test CAtomicQueue Done total = {}\n", total);
 
 }
