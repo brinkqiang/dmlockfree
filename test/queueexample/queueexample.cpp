@@ -5,6 +5,8 @@
 #include "dmqueue.h"
 #include "concurrentqueue.h"
 #include "blockingconcurrentqueue.h"
+#include "thread_safe_queue.h"
+
 
 #include "dmformat.h"
 
@@ -152,5 +154,63 @@ TEST(BlockingConcurrentQueue, BlockingConcurrentQueue)
 
 	t.join();
 	fmt::print("test BlockingConcurrentQueue Done total = {}\n", total);
+
+}
+TEST(ThreadSafeQueue, ThreadSafeQueue)
+{
+	fmt::print("test ThreadSafeQueue {}\n", gNum);
+	ThreadSafeQueue<int> q;
+
+	uint64_t total = 0;
+	auto t = std::thread([&] {
+		for (int i = 1; i < gNum;)
+		{
+			int a;
+			if (!q.try_pop(a))
+			{
+				//std::this_thread::sleep_for(std::chrono::milliseconds(1));;
+				continue;
+			}
+
+			total += a;
+			++i;
+		}
+		});
+
+	for (int i = 1; i < gNum; )
+	{
+		q.push(i);
+		i++;
+	}
+
+	t.join();
+	fmt::print("test ThreadSafeQueue Done total = {}\n", total);
+
+}
+
+TEST(ThreadSafeQueue_condition, ThreadSafeQueue_condition)
+{
+	fmt::print("test ThreadSafeQueue {}\n", gNum);
+	ThreadSafeQueue<int> q;
+
+	uint64_t total = 0;
+	auto t = std::thread([&] {
+		for (int i = 1; i < gNum;)
+		{
+			int a;
+			q.pop(a);
+			total += a;
+			++i;
+		}
+		});
+
+	for (int i = 1; i < gNum; )
+	{
+		q.push(i);
+		i++;
+	}
+
+	t.join();
+	fmt::print("test ThreadSafeQueue Done total = {}\n", total);
 
 }
