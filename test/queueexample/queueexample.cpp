@@ -63,7 +63,7 @@ TEST(CDMQueue, CDMQueue)
 
 			if (p == nullptr)
 			{
-				//std::this_thread::sleep_for(std::chrono::milliseconds(1));;
+				std::this_thread::yield();
 				continue;
 			}
 
@@ -78,6 +78,7 @@ TEST(CDMQueue, CDMQueue)
 	{
 		if (!q.PushBack(reinterpret_cast<void*>(i)))
 		{
+			std::this_thread::yield();
 			continue;
 		}
 		i++;
@@ -100,7 +101,7 @@ TEST(ConcurrentQueue, ConcurrentQueue)
 			int a;
 			if (!q.try_dequeue(a))
 			{
-				//std::this_thread::sleep_for(std::chrono::milliseconds(1));;
+				std::this_thread::yield();
 				continue;
 			}
 
@@ -113,6 +114,7 @@ TEST(ConcurrentQueue, ConcurrentQueue)
 	{
 		if (!q.try_enqueue(i))
 		{
+			std::this_thread::yield();
 			continue;
 		}
 		i++;
@@ -134,7 +136,7 @@ TEST(BlockingConcurrentQueue, BlockingConcurrentQueue)
 			int a;
 			if (!q.try_dequeue(a))
 			{
-				//std::this_thread::sleep_for(std::chrono::milliseconds(1));;
+				std::this_thread::yield();
 				continue;
 			}
 
@@ -147,6 +149,7 @@ TEST(BlockingConcurrentQueue, BlockingConcurrentQueue)
 	{
 		if (!q.try_enqueue(i))
 		{
+			std::this_thread::yield();
 			continue;
 		}
 		i++;
@@ -168,7 +171,7 @@ TEST(ThreadSafeQueue, ThreadSafeQueue)
 			int a;
 			if (!q.try_pop(a))
 			{
-				//std::this_thread::sleep_for(std::chrono::milliseconds(1));;
+				std::this_thread::yield();
 				continue;
 			}
 
