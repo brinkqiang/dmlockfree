@@ -25,7 +25,7 @@ TEST(CDMAtomicQueue, CDMAtomicQueue)
         {
             if (q.empty())
             {
-                //std::this_thread::sleep_for(std::chrono::milliseconds(1));;
+				std::this_thread::yield();
                 continue;
             }
 			int *a = q.front();
@@ -40,6 +40,7 @@ TEST(CDMAtomicQueue, CDMAtomicQueue)
     {
 		if (!q.try_push(i))
 		{
+			std::this_thread::yield();
 			continue;
 		}
 		i++;
