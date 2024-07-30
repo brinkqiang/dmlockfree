@@ -63,7 +63,7 @@ class CDMQueue {
         int nUsed = nDist >= m_nSize ? ( nDist - m_nSize ) : nDist;
 
         if ( 0 == nUsed ) {
-            return NULL;
+            return nullptr;
         }
 
         void* ptr = m_pArray[m_nHead];
