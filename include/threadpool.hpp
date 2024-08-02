@@ -10,7 +10,7 @@
 
 template<size_t N, size_t Q>
 class CDMQueueThreadPool {
-public:
+protected:
 	std::vector<std::thread> threads;
 	std::vector<CDMQueue> queues;
 	std::atomic<bool> running{ true };
@@ -27,8 +27,12 @@ public:
 			ProcessTask(task, id);
 		}
 	}
-public:
-	virtual void OnProcessTask(void* task, size_t threadId) {
+
+private:
+	bool shouldBalanceLoad(size_t threadId) {
+		int QueueSize = queues[threadId].GetUsedSize();
+
+		return QueueSize > max_queue / 2;
 	}
 
 	void ProcessTask(void* task, size_t threadId) {
@@ -41,11 +45,11 @@ public:
 		OnProcessTask(task, threadId);
 	}
 
-	virtual bool shouldBalanceLoad(size_t threadId) {
-		int QueueSize = queues[threadId].GetUsedSize();
-
-		return QueueSize > max_queue / 2;
+public:
+	virtual void OnProcessTask(void* task, size_t threadId)
+	{
 	}
+
 
 public:
 	CDMQueueThreadPool() {
@@ -66,7 +70,7 @@ public:
 		}
 	}
 
-	bool pushTask(void* task) {
+	bool PushTask(void* task) {
 		return queues[0].PushBack(task);
 	}
 };
