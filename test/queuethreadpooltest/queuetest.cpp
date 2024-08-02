@@ -5,7 +5,7 @@
 #include <random>
 #include "gtest.h"
 #include "dmqueue.h"
-#include "threadpool.hpp"
+#include "queuethreadpool.hpp"
 #include "dmformat.h"
 
 // 模拟任务的结构
@@ -51,7 +51,7 @@ TEST(CDMQueue, threadpool)
 {
 	const int NUM_THREADS = 10;
 	const int NUM_TASKS = 100000;
-	const int QUEUE_SIZE = 50;
+	const int QUEUE_SIZE = 100;
 
 	TestThreadLibrary<NUM_THREADS, QUEUE_SIZE> lib;
 
@@ -63,7 +63,7 @@ TEST(CDMQueue, threadpool)
 	// 生成并推送任务
 	for (int i = 0; i < NUM_TASKS;) {
 		Task* task = Task::Create( i, complexityDis(gen));
-		if (!lib.pushTask(task)) {
+		if (!lib.PushTask(task)) {
 			delete task;
 			continue;
 		}
