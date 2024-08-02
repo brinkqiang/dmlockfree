@@ -6,15 +6,15 @@
 #include <functional>
 #include <atomic>
 #include <iostream>
-#include "dmqueue.h" // Assuming the CDMQueue is in this header
+#include "dmqueue.h"
 
-template<size_t N>
-class ThreadLibrary {
+template<size_t N, size_t Q>
+class CDMQueueThreadPool {
 public:
 	std::vector<std::thread> threads;
 	std::vector<CDMQueue> queues;
 	std::atomic<bool> running{ true };
-	size_t max_queue = 100;
+	size_t max_queue = Q;
 
 	void ThreadFunction(size_t id) {
 		while (running) {
@@ -48,18 +48,18 @@ public:
 	}
 
 public:
-	ThreadLibrary() {
+	CDMQueueThreadPool() {
 		queues.resize(N);
 		for (auto& queue : queues) {
 			queue.Init(max_queue);
 		}
 
 		for (size_t i = 0; i < N; ++i) {
-			threads.emplace_back(&ThreadLibrary::ThreadFunction, this, i);
+			threads.emplace_back(&CDMQueueThreadPool::ThreadFunction, this, i);
 		}
 	}
 
-	~ThreadLibrary() {
+	~CDMQueueThreadPool() {
 		running = false;
 		for (auto& thread : threads) {
 			thread.join();

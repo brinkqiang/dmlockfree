@@ -27,8 +27,8 @@ struct Task {
 // 全局计数器，用于追踪已完成的任务
 std::atomic<int> completedTasks(0);
 
-template<size_t N>
-class TestThreadLibrary : public ThreadLibrary<N> {
+template<size_t N, size_t Q>
+class TestThreadLibrary : public CDMQueueThreadPool<N, Q> {
 public:
 	virtual void OnProcessTask(void* taskPtr, size_t threadId) override {
 		Task* task = static_cast<Task*>(taskPtr);
@@ -43,18 +43,17 @@ public:
 
 		// 增加完成任务计数
 		completedTasks++;
-
 	}
 };
 
 
 TEST(CDMQueue, threadpool)
 {
-	const int NUM_THREADS = 3;
-	const int NUM_TASKS = 10000;
+	const int NUM_THREADS = 10;
+	const int NUM_TASKS = 100000;
 	const int QUEUE_SIZE = 50;
 
-	TestThreadLibrary<NUM_THREADS> lib;
+	TestThreadLibrary<NUM_THREADS, QUEUE_SIZE> lib;
 
 	// 初始化随机数生成器
 	std::random_device rd;
