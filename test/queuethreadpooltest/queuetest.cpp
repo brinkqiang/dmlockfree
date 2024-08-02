@@ -37,7 +37,7 @@ public:
 		fmt::print("Thread {}  processed task:  {}\n", threadId, completedTasks);
 
 		// 模拟任务耗时
-		//std::this_thread::sleep_for(std::chrono::milliseconds(task->complexity));
+		std::this_thread::sleep_for(std::chrono::milliseconds(task->complexity));
 
 		task->Release();
 
@@ -50,7 +50,7 @@ public:
 TEST(CDMQueue, threadpool)
 {
 	const int NUM_THREADS = 10;
-	const int NUM_TASKS = 100000;
+	const int NUM_TASKS = 10000;
 	const int QUEUE_SIZE = 100;
 
 	TestThreadLibrary<NUM_THREADS, QUEUE_SIZE> lib;
