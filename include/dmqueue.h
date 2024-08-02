@@ -27,7 +27,7 @@
 class CDMQueue {
   public:
     CDMQueue( void )
-        : m_pArray( NULL ), m_nHead( 0 ), m_nTail( 0 ), m_nSize( 0 ) {
+        : m_pArray(nullptr), m_nHead( 0 ), m_nTail( 0 ), m_nSize( 0 ) {
     }
 
     ~CDMQueue( void ) {
@@ -73,6 +73,10 @@ class CDMQueue {
         return ptr;
     }
 
+	int GetUsedSize() const {
+		int nDist = m_nTail + m_nSize - m_nHead;
+		return nDist >= m_nSize ? (nDist - m_nSize) : nDist;
+	}
 
   protected:
     void**  m_pArray;
