@@ -28,7 +28,7 @@ struct Task {
 std::atomic<int> completedTasks(0);
 
 template<size_t N, size_t Q>
-class TestThreadLibrary : public CDMQueueThreadPool<N, Q> {
+class TestDMQueueThreadPool : public CDMQueueThreadPool<N, Q> {
 public:
 	virtual void OnProcessTask(void* taskPtr, size_t threadId) override {
 		Task* task = static_cast<Task*>(taskPtr);
@@ -53,7 +53,7 @@ TEST(CDMQueue, threadpool)
 	const int NUM_TASKS = 10000;
 	const int QUEUE_SIZE = 100;
 
-	TestThreadLibrary<NUM_THREADS, QUEUE_SIZE> lib;
+	TestDMQueueThreadPool<NUM_THREADS, QUEUE_SIZE> pool;
 
 	// 初始化随机数生成器
 	std::random_device rd;
@@ -63,7 +63,7 @@ TEST(CDMQueue, threadpool)
 	// 生成并推送任务
 	for (int i = 0; i < NUM_TASKS;) {
 		Task* task = Task::Create( i, complexityDis(gen));
-		if (!lib.PushTask(task)) {
+		if (!pool.PushTask(task)) {
 			delete task;
 			continue;
 		}
