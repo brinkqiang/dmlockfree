@@ -25,7 +25,6 @@ struct Task {
 };
 
 // 全局计数器，用于追踪已完成的任务
-std::atomic<int> completedTasks(0);
 
 template<size_t N, size_t Q>
 class TestDMQueueThreadPool : public CDMQueueThreadPool<N, Q> {
@@ -44,6 +43,12 @@ public:
 		// 增加完成任务计数
 		completedTasks++;
 	}
+
+public:
+	int GetCompletedTasks(){ return completedTasks; }
+private:
+	// 计数器，用于追踪已完成的任务
+	std::atomic<int> completedTasks = 0;
 };
 
 
@@ -72,9 +77,9 @@ TEST(CDMQueue, threadpool)
 	}
 
 	// 等待所有任务完成
-	while (completedTasks < NUM_TASKS) {
+	while (pool.GetCompletedTasks() < NUM_TASKS) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
 
-	std::cout << "All tasks completed. Total tasks processed: " << completedTasks << std::endl;
+	std::cout << "All tasks completed. Total tasks processed: " << pool.GetCompletedTasks() << std::endl;
 }
