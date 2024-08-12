@@ -39,8 +39,9 @@ protected:
 	size_t max_queue = Q;
 
 	void ThreadFunction(size_t id) {
+		auto& q = queues[id];
 		while (running) {
-			void* task = queues[id].PopFront();
+			void* task = q.PopFront();
 			if (nullptr == task)
 			{
 				std::this_thread::sleep_for(std::chrono::milliseconds(1));
