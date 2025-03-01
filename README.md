@@ -106,6 +106,5 @@ test CAtomicQueue Done total = 4999999950000000
 ```
 
 ## Contacts
-[![Join the chat](https://badges.gitter.im/brinkqiang/dmlockfree/Lobby.svg)](https://gitter.im/brinkqiang/dmlockfree)
 
 ## Thanks
