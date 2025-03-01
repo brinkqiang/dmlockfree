@@ -87,7 +87,6 @@ TEST(CDMQueue, CDMQueue)
 
 	t.join();
 	fmt::print("test CDMQueue Done total = {}\n", total);
-
 }
 
 TEST(ConcurrentQueue, ConcurrentQueue)
@@ -123,8 +122,8 @@ TEST(ConcurrentQueue, ConcurrentQueue)
 
 	t.join();
 	fmt::print("test ConcurrentQueue Done total = {}\n", total);
-
 }
+
 TEST(BlockingConcurrentQueue, BlockingConcurrentQueue)
 {
 	fmt::print("test BlockingConcurrentQueue {}\n", gNum);
@@ -158,7 +157,6 @@ TEST(BlockingConcurrentQueue, BlockingConcurrentQueue)
 
 	t.join();
 	fmt::print("test BlockingConcurrentQueue Done total = {}\n", total);
-
 }
 TEST(ThreadSafeQueue, ThreadSafeQueue)
 {
@@ -189,7 +187,6 @@ TEST(ThreadSafeQueue, ThreadSafeQueue)
 
 	t.join();
 	fmt::print("test ThreadSafeQueue Done total = {}\n", total);
-
 }
 
 TEST(ThreadSafeQueue_condition, ThreadSafeQueue_condition)
@@ -216,7 +213,6 @@ TEST(ThreadSafeQueue_condition, ThreadSafeQueue_condition)
 
 	t.join();
 	fmt::print("test ThreadSafeQueue Done total = {}\n", total);
-
 }
 
 TEST(CAtomicQueue, CAtomicQueue)
@@ -252,5 +248,4 @@ TEST(CAtomicQueue, CAtomicQueue)
 
 	t.join();
 	fmt::print("test CAtomicQueue Done total = {}\n", total);
-
 }
