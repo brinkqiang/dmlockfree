@@ -2,6 +2,7 @@
 #include "blockingconcurrentqueue.h"
 #include "concurrentqueue.h"
 #include "dmatomic_queue.h"
+#include "dmmutexqueue.h"
 #include "dmqueue.h"
 #include "gtest.h"
 #include "thread_safe_queue.h"
@@ -60,6 +61,39 @@ TEST_F(QueueTest, CDMAtomicQueue) {
 
 TEST_F(QueueTest, CDMQueue) {
     CDMQueue q;
+    q.Init(kMaxPoolSize);
+    std::atomic<uint64_t> total{0};
+
+    auto consumer = std::thread([&] {
+        for (int i = 0; i < kNum - 1;) {
+            void* p = q.PopFront();
+            if (!p) {
+                std::this_thread::yield();
+                continue;
+            }
+            int val = static_cast<int>(reinterpret_cast<intptr_t>(p));
+            total.fetch_add(val, std::memory_order_relaxed);
+            ++i;
+        }
+    });
+
+    auto producer = std::thread([&] {
+        for (int i = 1; i < kNum;) {
+            if (q.PushBack(reinterpret_cast<void*>(static_cast<intptr_t>(i)))) {
+                ++i;
+            } else {
+                std::this_thread::yield();
+            }
+        }
+    });
+
+    producer.join();
+    consumer.join();
+    ASSERT_EQ(total.load(), expected_total);
+}
+
+TEST_F(QueueTest, CDMMutexQueue) {
+    CDMMutexQueue q;
     q.Init(kMaxPoolSize);
     std::atomic<uint64_t> total{0};
 
