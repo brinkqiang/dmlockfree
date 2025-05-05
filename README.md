@@ -22,29 +22,17 @@ Copyright (c) 2013-2018 brinkqiang (brink.qiang@gmail.com)
 [win-link]:  https://github.com/brinkqiang/dmlockfree/actions/workflows/win.yml "win build status"
 
 ## Intro
-dmlockfree mod by SPSCQueue
-```cpp
-#include <iostream>
-#include <dmlockfree_spscqueue.h>
-#include <thread>
+dmlockfree
 
-int main(int argc, char *argv[]) {
-  (void)argc, (void)argv;
-  SPSCQueue<int> q(2);
-  auto t = std::thread([&] {
-    while (!q.front())
-      ;
-    std::cout << *q.front() << std::endl;
-    q.pop();
-  });
-  q.push(1);
-  t.join();
-
-  return 0;
-}
-
-```
-
+| 测试名称                     | Linux耗时(ms) | Windows耗时(ms) | 差异倍数(Linux为基准) |
+|------------------------------|---------------|------------------|----------------------|
+| CDMAtomicQueue               | 526           | 4081             | 7.76x                |
+| CDMQueue                     | 1367          | 2135             | 1.56x                |
+| ConcurrentQueue              | 7375          | 9292             | 1.26x                |
+| BlockingConcurrentQueue      | 12041         | 12176            | 1.01x                |
+| ThreadSafeQueue              | 6960          | 3771             | 0.54x                |
+| ThreadSafeQueue_condition    | 7597          | 3866             | 0.51x                |
+| CAtomicQueue                 | 16589         | 20905            | 1.26x                |
 
 ## test
 ```
