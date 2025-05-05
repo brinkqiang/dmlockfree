@@ -5,215 +5,233 @@
 #include "dmqueue.h"
 #include "gtest.h"
 #include "thread_safe_queue.h"
+#include <atomic>
 #include <iostream>
 #include <thread>
 
-
 #include "dmformat.h"
 
-const int gNum = 100000000;
-const int MaxPoolSize = 100000;
+const int gNum = 1000000;       // 测试数据量调整为百万级，便于快速验证
+const int MaxPoolSize = 100000; // 根据实际需求调整
 
-TEST(CDMAtomicQueue, CDMAtomicQueue) {
-  fmt::print("test CDMAtomicQueue {}\n", gNum);
+class QueueTest : public testing::Test {
+protected:
+    static const int kNum = gNum;
+    static const int kMaxPoolSize = MaxPoolSize;
+    uint64_t expected_total;
 
-  CDMAtomicQueue<int> q(MaxPoolSize);
-  uint64_t total = 0;
-  auto t = std::thread([&] {
-    for (int i = 1; i < gNum;) {
-      if (q.empty()) {
-        std::this_thread::yield();
-        continue;
-      }
-      int *a = q.front();
-      q.pop();
-
-      total += *a;
-      ++i;
+    void SetUp() override {
+        // 计算期望总和: sum = 1 + 2 + ... + (kNum - 1)
+        expected_total = (static_cast<uint64_t>(kNum) - 1) * kNum / 2;
     }
-  });
+};
 
-  for (int i = 1; i < gNum;) {
-    if (!q.try_push(i)) {
-      std::this_thread::yield();
-      continue;
-    }
-    i++;
-  }
+TEST_F(QueueTest, CDMAtomicQueue) {
+    CDMAtomicQueue<int> q(kMaxPoolSize);
+    std::atomic<uint64_t> total{0};
 
-  t.join();
-  fmt::print("test CDMAtomicQueue Done total = {}\n", total);
+    auto consumer = std::thread([&] {
+        for (int i = 0; i < kNum - 1;) {
+            if (q.empty()) {
+                std::this_thread::yield();
+                continue;
+            }
+            int* val = q.front();
+            q.pop();
+            total.fetch_add(*val, std::memory_order_relaxed);
+            ++i;
+        }
+    });
+
+    auto producer = std::thread([&] {
+        for (int i = 1; i < kNum;) {
+            if (q.try_push(i)) {
+                ++i;
+            } else {
+                std::this_thread::yield();
+            }
+        }
+    });
+
+    producer.join();
+    consumer.join();
+    ASSERT_EQ(total.load(), expected_total);
 }
 
-TEST(CDMQueue, CDMQueue) {
-  fmt::print("test CDMQueue {}\n", gNum);
+TEST_F(QueueTest, CDMQueue) {
+    CDMQueue q;
+    q.Init(kMaxPoolSize);
+    std::atomic<uint64_t> total{0};
 
-  CDMQueue q;
-  q.Init(MaxPoolSize);
-  uint64_t total = 0;
-  auto t = std::thread([&] {
-    for (int i = 1; i < gNum;) {
-      void *p = q.PopFront();
+    auto consumer = std::thread([&] {
+        for (int i = 0; i < kNum - 1;) {
+            void* p = q.PopFront();
+            if (!p) {
+                std::this_thread::yield();
+                continue;
+            }
+            int val = static_cast<int>(reinterpret_cast<intptr_t>(p));
+            total.fetch_add(val, std::memory_order_relaxed);
+            ++i;
+        }
+    });
 
-      if (p == nullptr) {
-        std::this_thread::yield();
-        continue;
-      }
+    auto producer = std::thread([&] {
+        for (int i = 1; i < kNum;) {
+            if (q.PushBack(reinterpret_cast<void*>(static_cast<intptr_t>(i)))) {
+                ++i;
+            } else {
+                std::this_thread::yield();
+            }
+        }
+    });
 
-      int a = reinterpret_cast<int>(p);
-
-      total += a;
-      ++i;
-    }
-  });
-
-  for (int i = 1; i < gNum;) {
-    if (!q.PushBack(reinterpret_cast<void *>(i))) {
-      std::this_thread::yield();
-      continue;
-    }
-    i++;
-  }
-
-  t.join();
-  fmt::print("test CDMQueue Done total = {}\n", total);
+    producer.join();
+    consumer.join();
+    ASSERT_EQ(total.load(), expected_total);
 }
 
-TEST(ConcurrentQueue, ConcurrentQueue) {
-  fmt::print("test ConcurrentQueue {}\n", gNum);
-  moodycamel::ConcurrentQueue<int> q(MaxPoolSize);
+TEST_F(QueueTest, ConcurrentQueue) {
+    moodycamel::ConcurrentQueue<int> q(kMaxPoolSize);
+    std::atomic<uint64_t> total{0};
 
-  uint64_t total = 0;
-  auto t = std::thread([&] {
-    for (int i = 1; i < gNum;) {
-      int a;
-      if (!q.try_dequeue(a)) {
-        std::this_thread::yield();
-        continue;
-      }
+    auto consumer = std::thread([&] {
+        for (int i = 0; i < kNum - 1;) {
+            int val;
+            if (q.try_dequeue(val)) {
+                total.fetch_add(val, std::memory_order_relaxed);
+                ++i;
+            } else {
+                std::this_thread::yield();
+            }
+        }
+    });
 
-      total += a;
-      ++i;
-    }
-  });
+    auto producer = std::thread([&] {
+        for (int i = 1; i < kNum;) {
+            if (q.try_enqueue(i)) {
+                ++i;
+            } else {
+                std::this_thread::yield();
+            }
+        }
+    });
 
-  for (int i = 1; i < gNum;) {
-    if (!q.try_enqueue(i)) {
-      std::this_thread::yield();
-      continue;
-    }
-    i++;
-  }
-
-  t.join();
-  fmt::print("test ConcurrentQueue Done total = {}\n", total);
+    producer.join();
+    consumer.join();
+    ASSERT_EQ(total.load(), expected_total);
 }
 
-TEST(BlockingConcurrentQueue, BlockingConcurrentQueue) {
-  fmt::print("test BlockingConcurrentQueue {}\n", gNum);
-  moodycamel::BlockingConcurrentQueue<int> q(MaxPoolSize);
+TEST_F(QueueTest, BlockingConcurrentQueue) {
+    moodycamel::BlockingConcurrentQueue<int> q(kMaxPoolSize);
+    std::atomic<uint64_t> total{0};
 
-  uint64_t total = 0;
-  auto t = std::thread([&] {
-    for (int i = 1; i < gNum;) {
-      int a;
-      if (!q.try_dequeue(a)) {
-        std::this_thread::yield();
-        continue;
-      }
+    auto consumer = std::thread([&] {
+        for (int i = 0; i < kNum - 1;) {
+            int val;
+            if (q.try_dequeue(val)) {
+                total.fetch_add(val, std::memory_order_relaxed);
+                ++i;
+            } else {
+                std::this_thread::yield();
+            }
+        }
+    });
 
-      total += a;
-      ++i;
-    }
-  });
+    auto producer = std::thread([&] {
+        for (int i = 1; i < kNum;) {
+            if (q.try_enqueue(i)) {
+                ++i;
+            } else {
+                std::this_thread::yield();
+            }
+        }
+    });
 
-  for (int i = 1; i < gNum;) {
-    if (!q.try_enqueue(i)) {
-      std::this_thread::yield();
-      continue;
-    }
-    i++;
-  }
-
-  t.join();
-  fmt::print("test BlockingConcurrentQueue Done total = {}\n", total);
-}
-TEST(ThreadSafeQueue, ThreadSafeQueue) {
-  fmt::print("test ThreadSafeQueue {}\n", gNum);
-  ThreadSafeQueue<int> q;
-
-  uint64_t total = 0;
-  auto t = std::thread([&] {
-    for (int i = 1; i < gNum;) {
-      int a;
-      if (!q.try_pop(a)) {
-        std::this_thread::yield();
-        continue;
-      }
-
-      total += a;
-      ++i;
-    }
-  });
-
-  for (int i = 1; i < gNum;) {
-    q.push(i);
-    i++;
-  }
-
-  t.join();
-  fmt::print("test ThreadSafeQueue Done total = {}\n", total);
+    producer.join();
+    consumer.join();
+    ASSERT_EQ(total.load(), expected_total);
 }
 
-TEST(ThreadSafeQueue_condition, ThreadSafeQueue_condition) {
-  fmt::print("test ThreadSafeQueue {}\n", gNum);
-  ThreadSafeQueue<int> q;
+TEST_F(QueueTest, ThreadSafeQueue) {
+    ThreadSafeQueue<int> q;
+    std::atomic<uint64_t> total{0};
 
-  uint64_t total = 0;
-  auto t = std::thread([&] {
-    for (int i = 1; i < gNum;) {
-      int a;
-      q.pop(a);
-      total += a;
-      ++i;
-    }
-  });
+    auto consumer = std::thread([&] {
+        for (int i = 0; i < kNum - 1;) {
+            int val;
+            if (q.try_pop(val)) {
+                total.fetch_add(val, std::memory_order_relaxed);
+                ++i;
+            } else {
+                std::this_thread::yield();
+            }
+        }
+    });
 
-  for (int i = 1; i < gNum;) {
-    q.push(i);
-    i++;
-  }
+    auto producer = std::thread([&] {
+        for (int i = 1; i < kNum; ++i) {
+            q.push(i);
+        }
+    });
 
-  t.join();
-  fmt::print("test ThreadSafeQueue Done total = {}\n", total);
+    producer.join();
+    consumer.join();
+    ASSERT_EQ(total.load(), expected_total);
 }
 
-TEST(CAtomicQueue, CAtomicQueue) {
-  fmt::print("test CAtomicQueue {}\n", gNum);
-  CAtomicQueue<int> q(MaxPoolSize);
+TEST_F(QueueTest, ThreadSafeQueueCondition) {
+    ThreadSafeQueue<int> q;
+    std::atomic<uint64_t> total{0};
 
-  uint64_t total = 0;
-  auto t = std::thread([&] {
-    for (int i = 1; i < gNum;) {
-      if (q.empty()) {
-        std::this_thread::yield();
-        continue;
-      }
-      int a = *(q.front());
-      q.pop();
-      total += a;
-      ++i;
-    }
-  });
+    auto consumer = std::thread([&] {
+        for (int i = 0; i < kNum - 1;) {
+            int val;
+            q.pop(val);
+            total.fetch_add(val, std::memory_order_relaxed);
+            ++i;
+        }
+    });
 
-  for (int i = 1; i < gNum;) {
-    if (!q.try_push(i)) {
-      std::this_thread::yield();
-      continue;
-    }
-    i++;
-  }
+    auto producer = std::thread([&] {
+        for (int i = 1; i < kNum; ++i) {
+            q.push(i);
+        }
+    });
 
-  t.join();
-  fmt::print("test CAtomicQueue Done total = {}\n", total);
+    producer.join();
+    consumer.join();
+    ASSERT_EQ(total.load(), expected_total);
+}
+
+TEST_F(QueueTest, CAtomicQueue) {
+    CAtomicQueue<int> q(kMaxPoolSize);
+    std::atomic<uint64_t> total{0};
+
+    auto consumer = std::thread([&] {
+        for (int i = 0; i < kNum - 1;) {
+            if (q.empty()) {
+                std::this_thread::yield();
+                continue;
+            }
+            int* val = q.front();
+            q.pop();
+            total.fetch_add(*val, std::memory_order_relaxed);
+            ++i;
+        }
+    });
+
+    auto producer = std::thread([&] {
+        for (int i = 1; i < kNum;) {
+            if (q.try_push(i)) {
+                ++i;
+            } else {
+                std::this_thread::yield();
+            }
+        }
+    });
+
+    producer.join();
+    consumer.join();
+    ASSERT_EQ(total.load(), expected_total);
 }
