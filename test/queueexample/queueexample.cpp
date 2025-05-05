@@ -11,7 +11,7 @@
 
 #include "dmformat.h"
 
-const uint64_t gNum = 100000000;       // 测试数据量调整为百万级，便于快速验证
+const uint64_t gNum = 10000*10000;       // 测试数据量调整为百万级，便于快速验证
 const uint64_t MaxPoolSize = 100000; // 根据实际需求调整
 
 class QueueTest : public testing::Test {
