@@ -1,4 +1,4 @@
-#include <iostream>
+ï»¿#include <iostream>
 #include <thread>
 #include <atomic>
 #include <chrono>
@@ -8,7 +8,7 @@
 #include "queuethreadpool.hpp"
 #include "dmformat.h"
 
-// Ä£ÄâÈÎÎñµÄ½á¹¹
+// æ¨¡æ‹Ÿä»»åŠ¡çš„ç»“æ„
 struct Task {
 	int id;
 	int complexity;
@@ -24,7 +24,7 @@ struct Task {
 	}
 };
 
-// È«¾Ö¼ÆÊıÆ÷£¬ÓÃÓÚ×·×ÙÒÑÍê³ÉµÄÈÎÎñ
+// å…¨å±€è®¡æ•°å™¨ï¼Œç”¨äºè¿½è¸ªå·²å®Œæˆçš„ä»»åŠ¡
 
 template<size_t N, size_t Q>
 class TestDMQueueThreadPool : public CDMQueueThreadPool<N, Q> {
@@ -35,19 +35,19 @@ public:
 
 		fmt::print("Thread {}  processed task:  {}\n", threadId, completedTasks);
 
-		// Ä£ÄâÈÎÎñºÄÊ±
+		// æ¨¡æ‹Ÿä»»åŠ¡è€—æ—¶
 		std::this_thread::sleep_for(std::chrono::milliseconds(task->complexity));
 
 		task->Release();
 
-		// Ôö¼ÓÍê³ÉÈÎÎñ¼ÆÊı
+		// å¢åŠ å®Œæˆä»»åŠ¡è®¡æ•°
 		completedTasks++;
 	}
 
 public:
 	int GetCompletedTasks(){ return completedTasks; }
 private:
-	// ¼ÆÊıÆ÷£¬ÓÃÓÚ×·×ÙÒÑÍê³ÉµÄÈÎÎñ
+	// è®¡æ•°å™¨ï¼Œç”¨äºè¿½è¸ªå·²å®Œæˆçš„ä»»åŠ¡
 	std::atomic<int> completedTasks = 0;
 };
 
@@ -60,12 +60,12 @@ TEST(CDMQueue, threadpool)
 
 	TestDMQueueThreadPool<NUM_THREADS, QUEUE_SIZE> pool;
 
-	// ³õÊ¼»¯Ëæ»úÊıÉú³ÉÆ÷
+	// åˆå§‹åŒ–éšæœºæ•°ç”Ÿæˆå™¨
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	std::uniform_int_distribution<> complexityDis(1, 1);
 
-	// Éú³É²¢ÍÆËÍÈÎÎñ
+	// ç”Ÿæˆå¹¶æ¨é€ä»»åŠ¡
 	for (int i = 0; i < NUM_TASKS;) {
 		Task* task = Task::Create( i, complexityDis(gen));
 		if (!pool.PushTask(task)) {
@@ -76,7 +76,7 @@ TEST(CDMQueue, threadpool)
 		++i;
 	}
 
-	// µÈ´ıËùÓĞÈÎÎñÍê³É
+	// ç­‰å¾…æ‰€æœ‰ä»»åŠ¡å®Œæˆ
 	while (pool.GetCompletedTasks() < NUM_TASKS) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
