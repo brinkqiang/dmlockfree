@@ -26,6 +26,7 @@
 #include <cstring>
 #include <algorithm>
 #include <stdexcept>
+#include <cstdint>
 
 class IKFifo {
 public:
